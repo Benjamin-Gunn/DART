@@ -1,4 +1,36 @@
 &model_nml
+!    3 column working. Output good.
+!
+!    state_variables       = 'SALT_CUR ', 'QTY_SALINITY                                  ', 'UPDATE',
+!                                      'TEMP_CUR ', 'QTY_POTENTIAL_TEMPERATURE', 'UPDATE',
+!                                      'UVEL_CUR ', 'QTY_U_CURRENT_COMPONENT  ', 'UPDATE',
+!                                      'VVEL_CUR ', 'QTY_V_CURRENT_COMPONENT  ', 'UPDATE',
+!                                      'PSURF_CUR', 'QTY_SEA_SURFACE_PRESSURE ', 'UPDATE'
+
+!    2 column working. Output good.
+!
+!    state_variables       = 'theta',                 'QTY_POTENTIAL_TEMPERATURE',
+!                            'rho',                   'QTY_DENSITY',
+!                            'uReconstructZonal',     'QTY_U_WIND_COMPONENT',
+!                            'uReconstructMeridional','QTY_V_WIND_COMPONENT',
+!                            'w',                     'QTY_VERTICAL_VELOCITY',
+!                            'qv',                    'QTY_VAPOR_MIXING_RATIO',
+!                            'surface_pressure',      'QTY_SURFACE_PRESSURE' 
+!
+
+!    5 column working, with .false. default_vars flag? Output good, exept no default_vars, var_qtys breaks?
+!
+    state_variables        = 'SH2O',    'QTY_SOIL_LIQUID_WATER', '0.0',   'NA', 'NOUPDATE',
+                  'SUBSURFACE_FLUX',    'QTY_SUBSURFACE',        '0.0',   'NA', 'NOUPDATE',
+                    'OVERLAND_FLUX',    'QTY_OVERLAND_FLOW',     '0.0',   'NA', 'NOUPDATE' 
+
+
+!    Alternate 5 column not working as expected! Defult output good, everything else broken!
+!
+!    state_variables       = 'U', 'QTY_U_WIND_COMPONENT', 'TYPE_U',   'UPDATE', '999',
+!                            'V', 'QTY_V_WIND_COMPONENT', 'TYPE_V',   'UPDATE', '999',
+!                          'U10', 'QTY_U_WIND_COMPONENT', 'TYPE_U10', 'UPDATE', '999',
+!                          'V10', 'QTY_V_WIND_COMPONENT', 'TYPE_V10', 'UPDATE', '999'
 /
 
 &utilities_nml
@@ -8,6 +40,8 @@
 
 &preprocess_nml
     input_obs_kind_mod_file = '../../../assimilation_code/modules/observations/DEFAULT_obs_kind_mod.F90'
+            quantity_files = '../../../assimilation_code/modules/observations/land_quantities_mod.f90',
+                            '../../../assimilation_code/modules/observations/default_quantities_mod.f90'
    output_obs_kind_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
      input_obs_def_mod_file = '../../../observations/forward_operators/DEFAULT_obs_def_mod.F90'
     output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
