@@ -5,10 +5,14 @@
 cd ..
 
 if [$3 -eq 0]; then
-	setup_test
+	test_test
 else
-	range_test
+	test_test
 fi
+
+test_test () {
+	echo "Test Value: $1 $2 $3 $4 $5 $6"
+}
 
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run

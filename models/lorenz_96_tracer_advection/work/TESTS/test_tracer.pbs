@@ -4,6 +4,7 @@
 #PBS -l walltime=00:10:00
 ## PBS_ARRAY_INDEX range, inclusive: (can be overridden by qsub command line arguments)
 #PBS -J 0-3
+#PBS -r y
 
 ## determine the number of nodes, and processors per node we were assigned
 ## (inferred based on select statement)
