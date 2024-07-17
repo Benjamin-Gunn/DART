@@ -6,7 +6,7 @@
 #PBS -J 0-3
 #PBS -r y
 
-## determine the number of nodes, and processors per node we were assigned
+## Determine the number of nodes, and processors per node we were assigned
 ## (inferred based on select statement)
 nodeslist=( $(cat ${PBS_NODEFILE} | sort | uniq | cut -d'.' -f1) )
 nnodes=$(cat ${PBS_NODEFILE} | sort | uniq | wc -l)
@@ -18,12 +18,13 @@ echo "${nranks} ${nnodes}x${nranks_per_node}"
 
 nsteps=$( cat inputs.txt | grep -v '#' | wc -l )
 
-# this PBS_ARRAY_INDEX will compute multiple "steps" from inputs.txt, up to ppn
+# This PBS_ARRAY_INDEX will compute multiple "steps" from inputs.txt, up to ppn
 start_idx=$(( ${PBS_ARRAY_INDEX} * ${nranks_per_node} ))
 stop_idx=$(( ${start_idx} + ${nranks_per_node} - 1 ))
 echo "nsteps: ${nsteps}, array index: ${PBS_ARRAY_INDEX}"
 echo "start_idx=${start_idx} stop_idx=${stop_idx}"
 
+# Clear any output from previous tests (if present)
 rm test_output
 
 # Change to work directory (one level up)
@@ -38,30 +39,35 @@ cd ..
 # Generate the 1000 timestep obs_seq.in file
 ./create_fixed_network_seq < TESTS/create_fixed_network_seq_in
 
+# Duplicate CSV file to iterate through
 cp TESTS/one_below_qceff_table.csv .
 
-# iterate over each test to run
+# Give execution rights for tests scripts
+chmod +x TESTS/getline.sh
+chmod +x TESTS/test_run.sh
+
+# Iterate over each test to run from inputs.txt
 for step in $(seq ${start_idx} ${stop_idx}); do
-    # the last PBS_ARRAY_INDEX could go past nsteps if inputs.txt isn't evenly divisible by ppn
+    # The last PBS_ARRAY_INDEX could go past nsteps if inputs.txt isn't evenly divisible by ppn
     [ ${step} -ge ${nsteps} ] && break
-    # get the command line arguments from inputs.txt for step (step counter is 0 based, so add 1)
-    cmdargs=$( ./getline.sh ./inputs.txt $(( ${step} + 1)) )
+    # Get the command line arguments from inputs.txt for step (step counter is 0 based, so add 1)
+    cmdargs=$( ./TESTS/getline.sh ./TESTS/inputs.txt $(( ${step} + 1)) )
     echo "   PBS_ARRAY_INDEX=${PBS_ARRAY_INDEX} launching step ${step} / args=${cmdargs}"
-    # run test script with correct parameters (setup included)
+    # Run test script with correct parameters (setup included)
     ./TESTS/test_run.sh ${cmdargs}
 done
 
-# wait for all the background processes to complete so PBS doesn't kill them early
+# Wait for all the background processes to complete so PBS doesn't kill them early
 wait
 
-echo _________________
+echo "_________________"
 echo
 
 cd TESTS
-diff -q test_output BASELINE_OUTPUT
+diff -q TESTS/test_output BASELINE_OUTPUT
 
-if [$status -eq 0]; then
-   echo TEST PASSED: test_output is the same as BASELINE_OUTPUT
+if [[ $status -eq 0 ]]; then
+   echo "TEST PASSED: test_output is the same as BASELINE_OUTPUT"
 else
-   echo TEST FAILED: test_output differs from BASELINE_OUTPUT
+   echo "TEST FAILED: test_output differs from BASELINE_OUTPUT"
 fi

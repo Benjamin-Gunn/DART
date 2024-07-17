@@ -2,13 +2,9 @@
 # $1 = CSV File, $2 = Ensemble Size, $3 = PE Count (or 0 for new CVS file setup), 
 # $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
 
-cd ..
-
-if [$3 -eq 0]; then
-	test_test
-else
-	test_test
-fi
+test_setup () {
+	echo "TEST SETUP: $1 $2 $3 $4 $5 $6 --------------"
+}
 
 test_test () {
 	echo "Test Value: $1 $2 $3 $4 $5 $6"
@@ -78,3 +74,13 @@ HERE
 	ncks -V -C -v state_variable_mean one_var_temp.nc | tail -3 | head -1 >> TESTS/test_output
 	rm one_var_temp.nc
 }
+
+# Tests called down here so that functions are declared
+
+cd ..
+
+if [[ $3 -eq 0 ]]; then
+        test_setup $1 $2 $3 $4 $5 $6
+else
+        test_test $1 $2 $3 $4 $5 $6
+fi
