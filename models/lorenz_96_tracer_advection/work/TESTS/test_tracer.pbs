@@ -6,6 +6,13 @@
 #PBS -J 0-3
 #PBS -r y
 
+echo " --------------------------------------"
+echo " Starting ... at YYYY MM DD HH MM SS ="
+dt=$(date '+%Y %m %d %H %M %S');
+echo "                 $dt"
+echo " Program test_tracer"
+echo " --------------------------------------"
+
 ## Determine the number of nodes, and processors per node we were assigned
 ## (inferred based on select statement)
 nodeslist=( $(cat ${PBS_NODEFILE} | sort | uniq | cut -d'.' -f1) )
@@ -24,11 +31,16 @@ stop_idx=$(( ${start_idx} + ${nranks_per_node} - 1 ))
 echo "nsteps: ${nsteps}, array index: ${PBS_ARRAY_INDEX}"
 echo "start_idx=${start_idx} stop_idx=${stop_idx}"
 
-# Clear any output from previous tests (if present)
-rm test_output
-
 # Change to work directory (one level up)
-cd ..
+cd ../..
+
+# Make a seperate work directory for iteration
+rm -r work_test_${PBS_ARRAY_INDEX}
+cp -r work work_test_${PBS_ARRAY_INDEX}
+cd work_test_${PBS_ARRAY_INDEX}
+
+# Clear any output from previous tests (if present)
+rm TESTS/test_output
 
 # Compile with mpi
 ./quickbuild.sh
@@ -60,7 +72,7 @@ done
 # Wait for all the background processes to complete so PBS doesn't kill them early
 wait
 
-echo "_________________"
+echo "--------------------------------------"
 echo
 
 cd TESTS
@@ -72,8 +84,8 @@ else
    echo "TEST FAILED: test_output differs from BASELINE_OUTPUT"
 fi
 
-# echo "--------------------------------------"
-# echo "Finished ... at YYYY MM DD HH MM SS ="
-# dt=$(date '+%Y %m %d %H %M %S');
-# echo "                 $dt"
-# echo " --------------------------------------"
+echo " --------------------------------------"
+echo " Finished ... at YYYY MM DD HH MM SS ="
+dt=$(date '+%Y %m %d %H %M %S');
+echo "                 $dt"
+echo " --------------------------------------"

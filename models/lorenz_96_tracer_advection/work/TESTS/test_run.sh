@@ -2,6 +2,8 @@
 # $1 = CSV File, $2 = Ensemble Size, $3 = PE Count (or 0 for new CVS file setup), 
 # $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
 
+module load nco
+
 test_setup () {
 	echo "TEST SETUP: $1 $2 $3 $4 $5 $6 --------------"
 	ls
@@ -15,7 +17,7 @@ test_test () {
 
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run
-	cp TESTS/TEST_BASE_INPUT.NML input.nml
+	cp TESTS/TEST_BASE_INPUT.nml input.nml
 
 	vi input.nml << HERE
 :1,\$s/T_QCEFF_TABLE_FILENAME/$1/
@@ -31,7 +33,7 @@ HERE
    	cp perfect_output.nc perfect_input.nc
 
    	# Do ensemble size of 160 so that subsequent ICs with mpirun will have same ICs
-   	cp TESTS/TEST_BASE_INPUT.NML input.nml
+	cp TESTS/TEST_BASE_INPUT.nml input.nml
    	vi input.nml << HERE
 :1,\$s/T_QCEFF_TABLE_FILENAME/$1/
 :1,\$s/T_READ_INPUT_STATE_FROM_FILE/.true./
@@ -55,7 +57,7 @@ HERE
 }
 
 range_test () {
-	cp TESTS/TEST_BASE_INPUT.NML input.nml
+	cp TESTS/TEST_BASE_INPUT.nml input.nml
 	vi input.nml << HERE
 :1,\$s/T_QCEFF_TABLE_FILENAME/$1/
 :1,\$s/T_READ_INPUT_STATE_FROM_FILE/.true./
@@ -70,7 +72,7 @@ HERE
 	# Make sure there is no file around in case filter fails
 	rm filter_output.nc
 
-	mpirun --oversubscribe -np $3 filter
+	mpirun -np $3 filter
 	echo -n 'ens_size = ' $2, 'pes = ' $3 '  ' >> TESTS/test_output
 	rm one_var_temp.nc
 	ncrcat -d location,1,1 filter_output.nc one_var_temp.nc
