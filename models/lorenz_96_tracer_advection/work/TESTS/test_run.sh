@@ -4,10 +4,13 @@
 
 test_setup () {
 	echo "TEST SETUP: $1 $2 $3 $4 $5 $6 --------------"
+	ls
+	cp TESTS/TEST_BASE_INPUT.nml input.nml
 }
 
 test_test () {
 	echo "Test Value: $1 $2 $3 $4 $5 $6"
+	ls
 }
 
 setup_test () {
@@ -75,12 +78,11 @@ HERE
 	rm one_var_temp.nc
 }
 
-# Tests called down here so that functions are declared
-
-cd ..
+# Tests called down here so that functions are declared,
+# Also, the script is currently in the work, so no need to cd
 
 if [[ $3 -eq 0 ]]; then
-        test_setup $1 $2 $3 $4 $5 $6
+	setup_test $1 $2 $3 $4 $5 $6
 else
-        test_test $1 $2 $3 $4 $5 $6
+        range_test $1 $2 $3 $4 $5 $6
 fi

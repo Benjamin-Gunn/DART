@@ -64,10 +64,16 @@ echo "_________________"
 echo
 
 cd TESTS
-diff -q TESTS/test_output BASELINE_OUTPUT
+diff -q test_output BASELINE_OUTPUT
 
 if [[ $status -eq 0 ]]; then
    echo "TEST PASSED: test_output is the same as BASELINE_OUTPUT"
 else
    echo "TEST FAILED: test_output differs from BASELINE_OUTPUT"
 fi
+
+# echo "--------------------------------------"
+# echo "Finished ... at YYYY MM DD HH MM SS ="
+# dt=$(date '+%Y %m %d %H %M %S');
+# echo "                 $dt"
+# echo " --------------------------------------"
