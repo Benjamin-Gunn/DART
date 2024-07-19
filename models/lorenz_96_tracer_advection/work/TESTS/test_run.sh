@@ -67,7 +67,7 @@ range_test () {
 	# Make sure there is no file around in case filter fails
 	rm filter_output.nc
 
-	mpirun -np $3 filter
+	mpirun -np $3 ./filter
 	echo -n 'ens_size = ' $2, 'pes = ' $3 '  ' >> TESTS/test_output
 	rm one_var_temp.nc
 	ncrcat -d location,1,1 filter_output.nc one_var_temp.nc
