@@ -2,7 +2,7 @@
    /
 
 &algorithm_info_nml
-   qceff_table_filename = 'T_QCEFF_TABLE_FILENAME'
+   qceff_table_filename = T_QCEFF_TABLE_FILENAME
    /
 
 &perfect_model_obs_nml
@@ -36,7 +36,7 @@
 
 &filter_nml
    single_file_in               = .true.,
-   input_state_files            = 'T_FILTER_INPUT'
+   input_state_files            = T_FILTER_INPUT
    input_state_file_list        = ''
 
    stages_to_write  = 'preassim', 'analysis', 'output'
