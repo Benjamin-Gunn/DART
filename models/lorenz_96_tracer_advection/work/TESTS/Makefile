@@ -1,13 +1,13 @@
 ACCOUNT := p86850054
 
 # nuumber of processors on a node (36 maxfor both casper and cheyenne, 128 for Derecho)
-ppn    ?= 128
+ppn    ?= 37
 
 # number of 'steps' to peform, assume the number of input args
 nsteps := $(shell cat ./inputs.txt | grep -v '\#' | wc -l)
 
 # number of PBS job array 'jobs' to perform.  Each job will execute up to ppn step.
-njobs  := $(shell echo $$(( $(nsteps)/$(ppn) )))
+njobs  := $(shell echo $$(($(nsteps)/$(ppn)-1)))
 
 
 

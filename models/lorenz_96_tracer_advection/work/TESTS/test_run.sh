@@ -4,17 +4,6 @@
 
 module load nco
 
-test_setup () {
-	echo "TEST SETUP: $1 $2 $3 $4 $5 $6 --------------"
-	ls
-	cp TESTS/TEST_BASE_INPUT.nml input.nml
-}
-
-test_test () {
-	echo "Test Value: $1 $2 $3 $4 $5 $6"
-	ls
-}
-
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run
 	cp TESTS/TEST_BASE_INPUT.nml input.nml
@@ -50,6 +39,7 @@ setup_test () {
    	cp filter_output.nc filter_input.nc
 
 	./perfect_model_obs
+	echo -n -e $1' post_inf_flavor is '$6'\n' >> TESTS/test_output
 }
 
 range_test () {
