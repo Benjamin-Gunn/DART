@@ -59,7 +59,6 @@ range_test () {
 
 	mpirun -np $3 ./filter
 	echo -n 'ens_size = ' $2, 'pes = ' $3 '  ' >> TESTS/test_output
-	rm one_var_temp.nc
 	ncrcat -d location,1,1 filter_output.nc one_var_temp.nc
 	ncks -V -C -v state_variable_mean one_var_temp.nc | tail -3 | head -1 >> TESTS/test_output
 	rm one_var_temp.nc

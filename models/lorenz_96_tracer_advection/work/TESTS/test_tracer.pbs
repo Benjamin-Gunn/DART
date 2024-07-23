@@ -57,6 +57,7 @@ cp TESTS/one_below_qceff_table.csv .
 # Give execution rights for tests scripts
 chmod +x TESTS/getline.sh
 chmod +x TESTS/test_run.sh
+chmod +x TESTS/test_cleanup.sh
 
 # Iterate over each test to run from inputs.txt
 for step in $(seq ${start_idx} ${stop_idx}); do
@@ -72,8 +73,13 @@ done
 # Wait for all the background processes to complete so PBS doesn't kill them early
 wait
 
-echo "--------------------------------------"
-echo
+echo " --------------------------------------"
+
+if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
+    echo " Cleaning up test work and output..."
+    echo " --------------------------------------"
+    ./TESTS/test_cleanup.sh $nnodes
+fi
 
 cd TESTS
 diff -q test_output BASELINE_OUTPUT
