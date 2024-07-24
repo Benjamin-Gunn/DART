@@ -74,20 +74,24 @@ done
 wait
 
 echo " --------------------------------------"
+echo " Test array finished."
 
 if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
     echo " Cleaning up test work and output..."
     echo " --------------------------------------"
-    ./TESTS/test_cleanup.sh $nnodes
-fi
+    ./TESTS/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
+    
+    cd TESTS
+    test_out=$(diff -q test_output BASELINE_OUTPUT)
 
-cd TESTS
-diff -q test_output BASELINE_OUTPUT
-
-if [[ $status -eq 0 ]]; then
-   echo "TEST PASSED: test_output is the same as BASELINE_OUTPUT"
+    if [[ test_out ]]; then
+    	echo " TEST FAILED: test_output is the same as BASELINE_OUTPUT"
+    else
+    	echo " TEST PASSED: test_output differs from BASELINE_OUTPUT"
+    fi
 else
-   echo "TEST FAILED: test_output differs from BASELINE_OUTPUT"
+    echo " --------------------------------------"
+    echo " Note: Test output is located in final test array."
 fi
 
 echo " --------------------------------------"
