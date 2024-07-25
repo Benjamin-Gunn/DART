@@ -2,7 +2,6 @@
 # Note: this program should be run by the last job array
 # $1 = number of job arrays tested
 
-cd ../work/TESTS/
 rm test_output
 
 for (( i=0 ; i<$1 ; i++ )); do

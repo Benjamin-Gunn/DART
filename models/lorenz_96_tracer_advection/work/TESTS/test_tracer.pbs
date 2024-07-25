@@ -34,7 +34,7 @@ echo "start_idx=${start_idx} stop_idx=${stop_idx}"
 # Change to work directory (one level up)
 cd ../..
 
-# Make a seperate work directory for iteration
+# Make a seperate and temporary work directory for iteration
 rm -r work_test_${PBS_ARRAY_INDEX}
 cp -r work work_test_${PBS_ARRAY_INDEX}
 cd work_test_${PBS_ARRAY_INDEX}
@@ -57,7 +57,7 @@ cp TESTS/one_below_qceff_table.csv .
 # Give execution rights for tests scripts
 chmod +x TESTS/getline.sh
 chmod +x TESTS/test_run.sh
-chmod +x TESTS/test_cleanup.sh
+chmod +x ../work/TESTS/test_cleanup.sh
 
 # Iterate over each test to run from inputs.txt
 for step in $(seq ${start_idx} ${stop_idx}); do
@@ -79,19 +79,21 @@ echo " Test array finished."
 if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
     echo " Cleaning up test work and output..."
     echo " --------------------------------------"
-    ./TESTS/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
-    
-    cd TESTS
+
+    # Navigate to test in order to clean-up temporary test directories and combine output
+    cd ../work/TESTS/
+    ./test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
     test_out=$(diff -q test_output BASELINE_OUTPUT)
 
+    # test_out should be an empty string if it was identical
     if [[ test_out ]]; then
-    	echo " TEST FAILED: test_output is the same as BASELINE_OUTPUT"
+    	echo " TEST FAILED: test_output differs from BASELINE_OUTPUT"
     else
-    	echo " TEST PASSED: test_output differs from BASELINE_OUTPUT"
+    	echo " TEST PASSED: test_output is the same as BASELINE_OUTPUT"
     fi
 else
     echo " --------------------------------------"
-    echo " Note: Test output is located in final test array."
+    echo " Note: Results are processed within final test array."
 fi
 
 echo " --------------------------------------"
