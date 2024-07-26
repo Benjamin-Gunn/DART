@@ -6,7 +6,7 @@ module load nco
 
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run
-	cp TESTS/TEST_BASE_INPUT.nml input.nml
+	cp ../../../developer_tests/tracer_filter/TEST_BASE_INPUT.nml input.nml
 
 	sed -i "s/T_QCEFF_TABLE_FILENAME/$1/g" input.nml
 	sed -i "s/T_READ_INPUT_STATE_FROM_FILE/.false./g" input.nml
@@ -20,7 +20,7 @@ setup_test () {
    	cp perfect_output.nc perfect_input.nc
 
    	# Do ensemble size of 160 so that subsequent ICs with mpirun will have same ICs
-	cp TESTS/TEST_BASE_INPUT.nml input.nml
+	cp ../../../developer_tests/tracer_filter/TEST_BASE_INPUT.nml input.nml
 
 	sed -i "s/T_QCEFF_TABLE_FILENAME/$1/g" input.nml
 	sed -i "s/T_READ_INPUT_STATE_FROM_FILE/.true./g" input.nml
@@ -39,11 +39,11 @@ setup_test () {
    	cp filter_output.nc filter_input.nc
 
 	./perfect_model_obs
-	echo -n -e $1' post_inf_flavor is '$6'\n' >> TESTS/test_output
+	echo -n -e $1' post_inf_flavor is '$6'\n' >> temp_test_output
 }
 
 range_test () {
-	cp TESTS/TEST_BASE_INPUT.nml input.nml
+	cp ../../../developer_tests/tracer_filter/TEST_BASE_INPUT.nml input.nml
 
         sed -i "s/T_QCEFF_TABLE_FILENAME/$1/g" input.nml
         sed -i "s/T_READ_INPUT_STATE_FROM_FILE/.true./g" input.nml
@@ -58,9 +58,9 @@ range_test () {
 	rm filter_output.nc
 
 	mpirun -np $3 ./filter
-	echo -n 'ens_size = ' $2, 'pes = ' $3 '  ' >> TESTS/test_output
+	echo -n 'ens_size = ' $2, 'pes = ' $3 '  ' >> temp_test_output
 	ncrcat -d location,1,1 filter_output.nc one_var_temp.nc
-	ncks -V -C -v state_variable_mean one_var_temp.nc | tail -3 | head -1 >> TESTS/test_output
+	ncks -V -C -v state_variable_mean one_var_temp.nc | tail -3 | head -1 >> temp_test_output
 	rm one_var_temp.nc
 }
 
