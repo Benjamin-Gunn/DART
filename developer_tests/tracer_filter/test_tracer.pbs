@@ -79,7 +79,7 @@ if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
 
     # Navigate to test in order to clean-up temporary test directories and combine output
     cd ../work/
-    ./test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
+    ./../../../developer_tests/tracer_filter/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
 
     # Once tests are complete, move back to developer_tests directory and compair
     cd ../../../developer_tests/tracer_filter/
