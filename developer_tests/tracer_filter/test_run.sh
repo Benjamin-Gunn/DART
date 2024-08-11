@@ -3,6 +3,7 @@
 # $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
 
 module load nco
+module load gcc
 
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run

@@ -1,0 +1,82 @@
+#!/bin/bash
+#PBS -N test_tracer
+#PBS -j oe
+#PBS -l walltime=00:10:00
+## PBS_ARRAY_INDEX range, inclusive: (can be overridden by qsub command line arguments)
+#PBS -J 0-0
+#PBS -r y
+## This script is intended to run an individual test case instead of a whole array
+## $1 = CSV File, $2 = Ensemble Size, $3 = PE Count (or 0 for new CVS file setup), 
+## $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
+
+echo " --------------------------------------"
+echo " Starting ... at YYYY MM DD HH MM SS ="
+dt=$(date '+%Y %m %d %H %M %S');
+echo "                 $dt"
+echo " Program test_solo"
+echo " --------------------------------------"
+
+# Switch compiler and correct namelist
+module load $comp
+rm TEST_BASE_INPUT.nml
+cp TEST_BASE_INPUT_$comp.nml TEST_BASE_INPUT.nml
+
+chmod +x ../../assimilation_code/modules/utilities/fixsystem
+if [[ $comp -eq "gcc" ]]; then
+	./../../assimilation_code/modules/utilities/fixsystem gfortran
+elif [[ $comp -eq "intel" ]]; then
+	./../../assimilation_code/modules/utilities/fixsystem ifort
+else
+	./../../assimilation_code/modules/utilities/fixsystem ifort
+fi
+
+# Change to L96 directory
+cd ../../models/lorenz_96_tracer_advection/
+
+# Make a  temporary work directory for array iteration
+rm -r work_test
+cp -r work work_test
+cd work_test
+
+# Clear any output from previous tests (if present)
+rm ../../../developer_tests/tracer_filter/test_output
+
+# Compile with mpi
+./quickbuild.sh mpif08
+
+# Create a single step obs_sequenc
+./create_obs_sequence < ../../../developer_tests/tracer_filter/create_obs_sequence_input
+
+# Generate the 1000 timestep obs_seq.in file
+./create_fixed_network_seq < ../../../developer_tests/tracer_filter/create_fixed_network_seq_in
+
+# Give execution rights for tests scripts
+chmod +x ../../../developer_tests/tracer_filter/getline.sh
+chmod +x ../../../developer_tests/tracer_filter/test_run.sh
+chmod +x ../../../developer_tests/tracer_filter/test_cleanup.sh
+
+echo "$(args)" | read v1 v2 v3 v4 v5 v6
+
+# Set up test, then run the individual test on login node
+echo " Test parameters: $(args)"
+./../../../developer_tests/tracer_filter/test_run.sh $v1 $v2 0 $v4 $v5 $v6
+./../../../developer_tests/tracer_filter/test_run.sh $v1 $v2 $v3 $v4 $v5 $v6
+
+# Wait for all the tests to complete
+wait
+
+echo " --------------------------------------"
+echo " Test array finished."
+echo " Outputting test results:"
+echo " --------------------------------------"
+
+# Navigate to test in order to clean-up temporary test directories and combine output
+cd ../work/
+cat ~/DART/models/lorenz_96_tracer_advection/work_test/temp_test_output
+rm -r ~/DART/models/lorenz_96_tracer_advection/work_test
+
+echo " --------------------------------------"
+echo " Finished ... at YYYY MM DD HH MM SS ="
+dt=$(date '+%Y %m %d %H %M %S');
+echo "                 $dt"
+echo " --------------------------------------"
