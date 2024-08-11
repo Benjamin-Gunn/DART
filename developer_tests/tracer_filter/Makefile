@@ -17,11 +17,10 @@ run:
 	@echo "compiler=$(comp)"
 	qsub -A $(ACCOUNT) -q main -J 0-$(njobs) -l select=1:ncpus=$(ppn):mpiprocs=$(ppn):mem=200G -r y -v comp=$(comp) test_tracer.pbs
 
-solo:
+solo single:
 	@echo "account=$(ACCOUNT)"
 	@echo "arguments=$(args)"
-	@echo "compiler=$(comp)"
-	qsub -A $(ACCOUNT) -q main -J 0-0 -l select=1:ncpus=1:mpiprocs=1:mem=200G -r y -v comp=$(comp) args=$(args) test_solo.pbs
+	qsub -A $(ACCOUNT) -q develop -J 0-1 -l select=1:ncpus=1:mpiprocs=1:mem=200G -r y -v args="$(args)" test_solo.pbs
 
 
 ifort intel:

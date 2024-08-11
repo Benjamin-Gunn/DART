@@ -57,6 +57,7 @@ cd work_test_${PBS_ARRAY_INDEX}
 rm ../../../developer_tests/tracer_filter/test_output
 
 # Compile with mpi
+./quickbuild.sh clean
 ./quickbuild.sh mpif08
 
 # Create a single step obs_sequenc

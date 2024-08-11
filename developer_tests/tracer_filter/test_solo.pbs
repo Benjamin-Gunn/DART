@@ -7,7 +7,7 @@
 #PBS -r y
 ## This script is intended to run an individual test case instead of a whole array
 ## $1 = CSV File, $2 = Ensemble Size, $3 = PE Count (or 0 for new CVS file setup), 
-## $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
+## $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor, $7 = compiler.
 
 echo " --------------------------------------"
 echo " Starting ... at YYYY MM DD HH MM SS ="
@@ -16,15 +16,18 @@ echo "                 $dt"
 echo " Program test_solo"
 echo " --------------------------------------"
 
+# Extract arguments
+echo "$(args)" | read v1 v2 v3 v4 v5 v6 v7
+
 # Switch compiler and correct namelist
-module load $comp
+module load $v7
 rm TEST_BASE_INPUT.nml
-cp TEST_BASE_INPUT_$comp.nml TEST_BASE_INPUT.nml
+cp TEST_BASE_INPUT_$v7.nml TEST_BASE_INPUT.nml
 
 chmod +x ../../assimilation_code/modules/utilities/fixsystem
-if [[ $comp -eq "gcc" ]]; then
+if [[ $v7 -eq "gcc" ]]; then
 	./../../assimilation_code/modules/utilities/fixsystem gfortran
-elif [[ $comp -eq "intel" ]]; then
+elif [[ $v7 -eq "intel" ]]; then
 	./../../assimilation_code/modules/utilities/fixsystem ifort
 else
 	./../../assimilation_code/modules/utilities/fixsystem ifort
@@ -42,6 +45,7 @@ cd work_test
 rm ../../../developer_tests/tracer_filter/test_output
 
 # Compile with mpi
+./quickbuild.sh clean
 ./quickbuild.sh mpif08
 
 # Create a single step obs_sequenc
@@ -55,10 +59,8 @@ chmod +x ../../../developer_tests/tracer_filter/getline.sh
 chmod +x ../../../developer_tests/tracer_filter/test_run.sh
 chmod +x ../../../developer_tests/tracer_filter/test_cleanup.sh
 
-echo "$(args)" | read v1 v2 v3 v4 v5 v6
-
 # Set up test, then run the individual test on login node
-echo " Test parameters: $(args)"
+echo " Test parameters: $v1 $v2 $v3 $v4 $v5 $v6"
 ./../../../developer_tests/tracer_filter/test_run.sh $v1 $v2 0 $v4 $v5 $v6
 ./../../../developer_tests/tracer_filter/test_run.sh $v1 $v2 $v3 $v4 $v5 $v6
 
