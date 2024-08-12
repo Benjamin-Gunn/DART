@@ -2,7 +2,6 @@
 #PBS -N test_tracer
 #PBS -j oe
 #PBS -l walltime=01:00:00
-## PBS_ARRAY_INDEX range, inclusive: (can be overridden by qsub command line arguments)
 #PBS -J 0-3
 #PBS -r y
 
@@ -13,63 +12,27 @@ echo "                 $dt"
 echo " Program test_tracer"
 echo " --------------------------------------"
 
-# Switch compiler and correct namelist
-module load $comp
-rm TEST_BASE_INPUT.nml
-cp TEST_BASE_INPUT_$comp.nml TEST_BASE_INPUT.nml
+# Give execution rights for tests scripts
+chmod +x getline.sh
+chmod +x test_run.sh
+chmod +x test_cleanup.sh
 
-chmod +x ../../assimilation_code/modules/utilities/fixsystem
-if [[ $comp -eq "gcc" ]]; then
-	./../../assimilation_code/modules/utilities/fixsystem gfortran
-elif [[ $comp -eq "intel" ]]; then
-	./../../assimilation_code/modules/utilities/fixsystem ifort
-else
-	./../../assimilation_code/modules/utilities/fixsystem ifort
-fi
-
-## Determine the number of nodes, and processors per node we were assigned
-## (inferred based on select statement)
+# Determine the number of nodes, processors per node, and steps from inputs.txt, up to ppn
 nodeslist=( $(cat ${PBS_NODEFILE} | sort | uniq | cut -d'.' -f1) )
 nnodes=$(cat ${PBS_NODEFILE} | sort | uniq | wc -l)
 nranks=$(cat ${PBS_NODEFILE} | sort | wc -l)
+nsteps=$(cat inputs.txt | grep -v '#' | wc -l )
 nranks_per_node=$((${nranks} / ${nnodes}))
-
-[ ${nnodes} -eq 1 ] || { echo "ERROR: this test is for 1 node, but with many array jobs"; exit 1; }
-echo "${nranks} ${nnodes}x${nranks_per_node}"
-
-nsteps=$( cat inputs.txt | grep -v '#' | wc -l )
-
-# This PBS_ARRAY_INDEX will compute multiple "steps" from inputs.txt, up to ppn
 start_idx=$(( ${PBS_ARRAY_INDEX} * ${nranks_per_node} ))
 stop_idx=$(( ${start_idx} + ${nranks_per_node} - 1 ))
 echo "nsteps: ${nsteps}, array index: ${PBS_ARRAY_INDEX}"
 echo "start_idx=${start_idx} stop_idx=${stop_idx}"
 
-# Change to L96 directory
+# Make a temporary work directory for array iteration
 cd ../../models/lorenz_96_tracer_advection/
-
-# Make a  temporary work directory for array iteration
 rm -r work_test_${PBS_ARRAY_INDEX}
 cp -r work work_test_${PBS_ARRAY_INDEX}
 cd work_test_${PBS_ARRAY_INDEX}
-
-# Clear any output from previous tests (if present)
-rm ../../../developer_tests/tracer_filter/test_output
-
-# Compile with mpi
-./quickbuild.sh clean
-./quickbuild.sh mpif08
-
-# Create a single step obs_sequenc
-./create_obs_sequence < ../../../developer_tests/tracer_filter/create_obs_sequence_input
-
-# Generate the 1000 timestep obs_seq.in file
-./create_fixed_network_seq < ../../../developer_tests/tracer_filter/create_fixed_network_seq_in
-
-# Give execution rights for tests scripts
-chmod +x ../../../developer_tests/tracer_filter/getline.sh
-chmod +x ../../../developer_tests/tracer_filter/test_run.sh
-chmod +x ../../../developer_tests/tracer_filter/test_cleanup.sh
 
 # Iterate over each test to run from inputs.txt
 for step in $(seq ${start_idx} ${stop_idx}); do
@@ -96,7 +59,7 @@ if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
     cd ../work/
     ./../../../developer_tests/tracer_filter/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
 
-    # Once tests are complete, move back to developer_tests directory and compair
+    # Once tests are complete, move back to developer_tests directory and compare
     cd ../../../developer_tests/tracer_filter/
     test_out=$(diff -q test_output BASELINE_OUTPUT)
 
@@ -108,7 +71,7 @@ if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
     fi
 else
     echo " --------------------------------------"
-    echo " Note: Results are processed within final test array."
+    echo " Note: Results are typically processed within final test array."
 fi
 
 echo " --------------------------------------"
