@@ -4,12 +4,14 @@
 
 # Switch compiler and correct namelist
 module load $comp
+module load nco
 rm TEST_BASE_INPUT.nml
 cp TEST_BASE_INPUT_$comp.nml TEST_BASE_INPUT.nml
 echo "compiler=$comp"
 
 # Clear any output from previous tests (if present)
 rm test_output
+rm test_result
 
 # Rename previous mkmf.template
 mv ../../build_templates/mkmf.template ../../build_templates/mkmf.template.previous

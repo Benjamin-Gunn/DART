@@ -14,6 +14,13 @@ echo " --------------------------------------"
 # Extract arguments (v# = argument for test)
 # v1 = CSV File, v2 = Ensemble Size, v3 = PE Count (or 0 for new CVS file setup), 
 # v4 = positive_tracer, v5 = bounded_above, v6 = post_inf_flavor, v7 = compiler.
+if [ -z "$(args)" ]; then 
+	echo " Error: Arguments not set!"
+	echo " Arguments should be entered like this:"
+	echo "     make solo args=\"'CSV_File' ensemble_size PE_count positive_tracer bounded_above post_inf_flavor compiler\""
+	exit
+fi
+
 echo "$(args)" | read v1 v2 v3 v4 v5 v6 v7
 
 # Set up test and make a temporary work directory
@@ -34,8 +41,8 @@ echo " Outputting test results:"
 echo " --------------------------------------"
 
 # Move out of work_test and output result
+cat temp_test_output
 cd ..
-cat /work_test/temp_test_output
 rm -r /work_test
 
 echo " --------------------------------------"

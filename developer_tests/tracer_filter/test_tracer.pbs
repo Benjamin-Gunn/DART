@@ -45,35 +45,22 @@ for step in $(seq ${start_idx} ${stop_idx}); do
     ./../../../developer_tests/tracer_filter/test_run.sh ${cmdargs}
 done
 
-# Wait for all the background processes to complete so PBS doesn't kill them early
+# Wait for all the background processes to complete so PBS doesn't kill them early.
 wait
 
+# Job array is done, so it will create a file in the test directory to report that.
+touch ./../../../developer_tests/tracer_filter/test_array_finished_${PBS_ARRAY_INDEX}
 echo " --------------------------------------"
-echo " Test array finished."
+echo " Array ${PBS_ARRAY_INDEX} finished."
 
-if [[ $(( ${step} + 1)) -eq $nsteps ]]; then
-    echo " Cleaning up test work and output..."
-    echo " --------------------------------------"
+# test_cleanup.sh only cleans up once, but only on the last running array.
+cd ~/DART/
+./developer_tests/tracer_filter/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
 
-    # Navigate to test in order to clean-up temporary test directories and combine output
-    cd ../work/
-    ./../../../developer_tests/tracer_filter/test_cleanup.sh $(( ${PBS_ARRAY_INDEX} + 1))
-
-    # Once tests are complete, move back to developer_tests directory and compare
-    cd ../../../developer_tests/tracer_filter/
-    test_out=$(diff -q test_output BASELINE_OUTPUT)
-
-    # test_out should be an empty string if it was identical
-    if [[ test_out ]]; then
-    	echo " TEST FAILED: test_output differs from BASELINE_OUTPUT"
-    else
-    	echo " TEST PASSED: test_output is the same as BASELINE_OUTPUT"
-    fi
-else
-    echo " --------------------------------------"
-    echo " Note: Results are typically processed within final test array."
-fi
-
+echo " Result of tests located in test_result"
+echo " once all test arrays finish."
+echo " --------------------------------------"
+echo ""
 echo " --------------------------------------"
 echo " Finished ... at YYYY MM DD HH MM SS ="
 dt=$(date '+%Y %m %d %H %M %S');

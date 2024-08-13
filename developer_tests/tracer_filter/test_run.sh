@@ -2,8 +2,6 @@
 # $1 = CSV File, $2 = Ensemble Size, $3 = PE Count (or 0 for new CVS file setup), 
 # $4 = positive_tracer, $5 = bounded_above, $6 = post_inf_flavor
 
-module load nco
-
 setup_test () {
 	# Set up input.nml to do the initial perfect_model_obs run
 	cp ../../../developer_tests/tracer_filter/TEST_BASE_INPUT.nml input.nml
