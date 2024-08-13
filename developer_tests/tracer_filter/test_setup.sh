@@ -1,8 +1,12 @@
 #!/bin/bash
+# Default behavior selects gcc as compiler
+[[ $1 == "" ]] && comp="gcc" || comp=$1
+
 # Switch compiler and correct namelist
-module load $1
+module load $comp
 rm TEST_BASE_INPUT.nml
-cp TEST_BASE_INPUT_$1.nml TEST_BASE_INPUT.nml
+cp TEST_BASE_INPUT_$comp.nml TEST_BASE_INPUT.nml
+echo "compiler=$comp"
 
 # Clear any output from previous tests (if present)
 rm test_output
@@ -24,14 +28,14 @@ else
 fi
 
 # Change to L96 directory
-cd ../../models/lorenz_96_tracer_advection/
+cd ../../models/lorenz_96_tracer_advection/work/
 
 # Compile with mpi
 ./quickbuild.sh clean
 ./quickbuild.sh mpif08
 
-# Create a single step obs_sequenc
-./create_obs_sequence < ../../../developer_tests/tracer_filter/create_obs_sequence_input
+# Create a single step obs_sequence
+./create_obs_sequence < ~/DART/developer_tests/tracer_filter/create_obs_sequence_input
 
 # Generate the 1000 timestep obs_seq.in file
-./create_fixed_network_seq < ../../../developer_tests/tracer_filter/create_fixed_network_seq_in
+./create_fixed_network_seq < ~/DART/developer_tests/tracer_filter/create_fixed_network_seq_in
